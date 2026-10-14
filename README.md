@@ -41,7 +41,20 @@ drawing PDF --> Claude reads it --> part + machining features --> you review / e
    columns and live formulas (estimated cycle times are highlighted), plus a
    `TL breakdown` sheet with every operation.
 
-## Run it
+## Web version (no install)
+
+`web/index.html` + `web/engine.js` is the same estimator as a browser page, published as a
+claude.ai Artifact: https://claude.ai/artifact/9PWkpQ7FR9cSYjAHEuQ5LG (private until shared
+from its Share menu).
+
+- Drawings are read by Claude on the **viewer's own Claude account**: no API key needed.
+- Reference parts, machine data and the rounding step live in the page's shared store, so
+  calibration improves for everyone who uses it. Each person's quotation is private to them.
+- Excel download keeps the Straight sheet formulas, plus a TL breakdown sheet.
+- `web/engine.js` is a port of the Python engine; `tests/test_web_engine.py` checks both give
+  identical results.
+
+## Run it locally
 
 The client's drawings, cost sheet and machine quotation are **not committed** because this
 repository is public. Put them in `samples/` locally (`samples/cost_sheet.xlsx`,
@@ -103,6 +116,7 @@ wrong. It needs more reference parts with **measured** shop-floor times to be ac
 
 ```
 app.py                      Streamlit UI (quote, calibration, machine data)
+web/                        browser version (published as a claude.ai Artifact)
 cli.py                      command-line entry points
 hydroquote/                 models, extraction, cycle_time, calibration, costing, excel_io
 data/machine_profile.json   Smarturn limits, shop timings, cutting data

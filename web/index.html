@@ -1,0 +1,944 @@
+<title>Hydromatik Quote Desk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a shop-floor work sheet. Part on the left, the live answer (cycle time, cost) pinned on the right,
+   the quotation underneath. Accent = chromate zinc-yellow, the plating colour named on the drawings. */
+:root {
+  --bg: #eef1f3;
+  --surface: #ffffff;
+  --sunken: #f6f8f9;
+  --ink: #161a1e;
+  --muted: #5a6670;
+  --line: #d4dade;
+  --accent: #e8b923;
+  --accent-ink: #6b5100;
+  --accent-soft: #fbf1cc;
+  --steel: #2e5a78;
+  --good: #2f7a4b;
+  --warn: #9a5b00;
+  --warn-soft: #fff4dc;
+  --bad: #b3261e;
+  --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --radius: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101316; --surface: #181c20; --sunken: #13171a; --ink: #e5e9ec; --muted: #95a1ab;
+    --line: #2b3238; --accent: #f0c232; --accent-ink: #f5d466; --accent-soft: #3a3115;
+    --steel: #7fb0d2; --good: #6cc48d; --warn: #f0b35a; --warn-soft: #33270f; --bad: #ff8a80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101316; --surface: #181c20; --sunken: #13171a; --ink: #e5e9ec; --muted: #95a1ab;
+  --line: #2b3238; --accent: #f0c232; --accent-ink: #f5d466; --accent-soft: #3a3115;
+  --steel: #7fb0d2; --good: #6cc48d; --warn: #f0b35a; --warn-soft: #33270f; --bad: #ff8a80;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+}
+.wrap { max-width: 1320px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: 0.01em; text-wrap: balance; margin: 0; }
+h1 { font-size: 30px; line-height: 1.05; }
+h2 { font-size: 21px; }
+h3 { font-size: 16px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; }
+.mono, td.num, input[type="number"] { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: 12.5px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; padding-block: 22px 14px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.mark { width: 34px; height: 34px; flex: none; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--muted); }
+.facts b { color: var(--ink); font-weight: 500; font-family: var(--font-mono); }
+
+nav.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin-bottom: 18px; overflow-x: auto; }
+nav.tabs button {
+  appearance: none; background: none; border: 0; border-bottom: 3px solid transparent; color: var(--muted);
+  font: 600 15px var(--font-display); letter-spacing: 0.05em; text-transform: uppercase; padding: 10px 14px 9px; cursor: pointer; white-space: nowrap;
+}
+nav.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+nav.tabs button:focus-visible { outline: 2px solid var(--steel); outline-offset: -2px; }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 18px; align-items: start; }
+@media (max-width: 980px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.stack { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; min-width: 0; }
+.panel > header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.answer { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+@media (max-width: 980px) { .answer { position: static; } }
+
+label.f { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); min-width: 0; }
+input, select, textarea {
+  font: inherit; color: var(--ink); background: var(--sunken); border: 1px solid var(--line); border-radius: 4px;
+  padding: 6px 8px; min-width: 0; width: 100%;
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px solid var(--steel); outline-offset: 1px; }
+input[type="checkbox"] { width: auto; }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+.fields .wide { grid-column: span 2; }
+@media (max-width: 520px) { .fields .wide { grid-column: span 1; } }
+
+button.btn {
+  appearance: none; font: 500 13.5px var(--font-body); border-radius: 4px; padding: 7px 14px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+button.btn:hover:not(:disabled) { border-color: var(--muted); }
+button.btn.primary { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+button.btn.primary:hover:not(:disabled) { background: var(--steel); border-color: var(--steel); }
+button.btn.accent { background: var(--accent); color: #1c1600; border-color: var(--accent); font-weight: 600; }
+button.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+button.link { appearance: none; background: none; border: 0; color: var(--steel); padding: 0; cursor: pointer; font: inherit; text-decoration: underline; text-underline-offset: 2px; }
+button.icon { appearance: none; background: none; border: 0; color: var(--muted); cursor: pointer; padding: 4px 6px; font-size: 16px; line-height: 1; border-radius: 4px; }
+button.icon:hover { color: var(--bad); background: var(--sunken); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.drop {
+  border: 1.5px dashed var(--line); border-radius: var(--radius); background: var(--sunken); padding: 14px;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center;
+}
+.drop.over { border-color: var(--accent); background: var(--accent-soft); }
+@media (max-width: 560px) { .drop { grid-template-columns: minmax(0, 1fr); } }
+.drop input[type="file"] { background: none; border: 0; padding: 0; }
+.status { font-size: 13px; padding: 8px 10px; border-radius: 4px; background: var(--sunken); border-left: 3px solid var(--steel); }
+.status.warn { background: var(--warn-soft); border-left-color: var(--warn); }
+.status.bad { border-left-color: var(--bad); }
+.status.good { border-left-color: var(--good); }
+ul.warnings { margin: 0; padding-left: 18px; }
+
+.drawing { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.drawing img { width: 100%; border: 1px solid var(--line); border-radius: 4px; background: #fff; cursor: zoom-in; }
+.drawing.zoom img { cursor: zoom-out; max-width: none; width: 220%; }
+.drawing-frame { overflow: auto; max-height: 520px; border-radius: 4px; }
+
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th { text-align: left; font: 600 11.5px var(--font-body); text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); background: var(--sunken); padding: 7px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 4px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tr:last-child td { border-bottom: 0; }
+td.num, th.num { text-align: right; }
+table.edit td { padding: 3px 4px; }
+table.edit input, table.edit select { padding: 4px 6px; font-size: 13px; }
+table.edit td.num input { text-align: right; width: 78px; }
+table.edit td.note input { min-width: 120px; }
+table.edit select.end { min-width: 56px; }
+table.edit select.type { min-width: 124px; }
+label.check { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; color: var(--muted); }
+label.check input { margin-top: 2px; flex: none; }
+tr.endB td:first-child { box-shadow: inset 3px 0 0 var(--steel); }
+tr.endA td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+
+.ct { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+.ct .big { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.ct .big .v { font: 700 54px/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.ct .big .u { font: 600 20px var(--font-display); color: var(--muted); }
+.chip { display: inline-block; font: 600 11px var(--font-body); letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 7px; border-radius: 3px; background: var(--accent-soft); color: var(--accent-ink); }
+.chip.steel { background: var(--sunken); color: var(--steel); border: 1px solid var(--line); }
+.kv { display: flex; flex-direction: column; gap: 1px; }
+.kv .k { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.kv .v { font-family: var(--font-mono); font-size: 15px; font-variant-numeric: tabular-nums; }
+.costlist { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-size: 13.5px; margin: 0; }
+.costlist dt { color: var(--muted); }
+.costlist dd { margin: 0; text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.costlist .total { font-weight: 600; color: var(--ink); border-top: 1px solid var(--line); padding-top: 6px; }
+.costlist .sp { font: 700 26px var(--font-display); color: var(--ink); }
+hr.rule { border: 0; border-top: 1px solid var(--line); margin: 14px 0; }
+details summary { cursor: pointer; color: var(--steel); font-size: 13px; }
+details[open] summary { margin-bottom: 8px; }
+
+.empty { text-align: center; padding: 26px 12px; color: var(--muted); }
+.qtotal { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; }
+.qtotal .sum { font: 700 28px var(--font-display); font-variant-numeric: tabular-nums; }
+.note-band { background: var(--warn-soft); border: 1px solid var(--line); border-left: 3px solid var(--warn); border-radius: 4px; padding: 10px 12px; font-size: 13px; }
+.cd-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.cd-grid fieldset { border: 1px solid var(--line); border-radius: 4px; padding: 10px; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; min-width: 0; }
+.cd-grid legend { font: 600 13px var(--font-display); letter-spacing: 0.06em; text-transform: uppercase; padding: 0 4px; }
+[hidden] { display: none !important; }
+@media (prefers-reduced-motion: no-preference) { button.btn, nav.tabs button { transition: background-color .12s, border-color .12s, color .12s; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 34 34" aria-hidden="true">
+        <polygon points="17,2 30,9.5 30,24.5 17,32 4,24.5 4,9.5" fill="var(--accent)" stroke="var(--ink)" stroke-width="1.5"/>
+        <circle cx="17" cy="17" r="5.5" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>
+      </svg>
+      <div>
+        <h1>Hydromatik Quote Desk</h1>
+        <div class="small muted">Drawing → cycle time (TL) → Straight cost sheet</div>
+      </div>
+    </div>
+    <div class="facts" id="facts"></div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="tab-quote" aria-selected="true" data-tab="quote">Quote</button>
+    <button role="tab" id="tab-refs" aria-selected="false" data-tab="refs">Reference parts</button>
+    <button role="tab" id="tab-machine" aria-selected="false" data-tab="machine">Machine &amp; cutting data</button>
+  </nav>
+
+  <!-- ============================== QUOTE ============================== -->
+  <section id="view-quote">
+    <div class="grid">
+      <div class="stack">
+        <div class="panel">
+          <header><h2>1 · Drawing</h2><span class="small muted" id="reader-note"></span></header>
+          <div class="drop" id="drop">
+            <div class="stack" style="gap:6px">
+              <label class="f" for="file">Fitting drawing (PDF, PNG or JPG). Claude reads the dimensions and lists the machining features.
+                <input type="file" id="file" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/*">
+              </label>
+            </div>
+            <div class="row">
+              <button class="btn accent" id="read" disabled>Read drawing</button>
+              <button class="btn" id="stop" hidden>Stop</button>
+            </div>
+          </div>
+          <div class="row" style="margin-top:12px">
+            <label class="f" for="refpick" style="flex:1 1 220px">Or start from a reference part
+              <select id="refpick"><option value="">Loading reference parts…</option></select>
+            </label>
+            <button class="btn" id="loadref" style="align-self:end">Load</button>
+            <button class="btn" id="blank" style="align-self:end">Blank part</button>
+          </div>
+          <div id="read-status" class="status" style="margin-top:12px" hidden></div>
+          <details id="drawing-box" style="margin-top:12px" hidden open>
+            <summary>Drawing preview (click the image to zoom)</summary>
+            <div class="drawing-frame"><div class="drawing" id="drawing"></div></div>
+          </details>
+        </div>
+
+        <div class="panel" id="part-panel">
+          <header>
+            <h2>2 · Part &amp; machining features</h2>
+            <span class="chip steel" id="part-source">No part loaded</span>
+          </header>
+          <div id="part-warnings" class="status warn" style="margin-bottom:12px" hidden></div>
+          <div class="fields">
+            <label class="f wide" for="p-desc">Description<input id="p-desc" placeholder="e.g. GE 12 X 3/8 - L - B"></label>
+            <label class="f" for="p-dwg">Drawing no.<input id="p-dwg"></label>
+            <label class="f" for="p-rm">RM<input id="p-rm" value="CS"></label>
+            <label class="f" for="p-shape">Shape
+              <select id="p-shape"><option value="S">S · hex bar</option><option value="R">R · round bar</option></select>
+            </label>
+            <label class="f" for="p-y">Y · hex AF (mm)<input id="p-y" type="number" step="0.5" min="1"></label>
+            <label class="f" for="p-l">L · length (mm)<input id="p-l" type="number" step="0.5" min="1"></label>
+          </div>
+          <p class="small muted" style="margin:12px 0 8px">End A is cut in the first setup (usually the stud / port end), end B after flipping. Check every row against the drawing.</p>
+          <div class="tablewrap">
+            <table class="edit" id="feat-table">
+              <thead><tr><th>End</th><th>Feature</th><th class="num">Dia</th><th class="num">Length</th><th class="num">Pitch</th><th class="num">Qty</th><th>Note</th><th></th></tr></thead>
+              <tbody id="feat-body"></tbody>
+            </table>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" id="addfeat">+ Add feature</button>
+            <span class="small muted">Dimensions in mm. Thread dia = major dia; groove dia = root dia, length = width; bore/drill length = depth.</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="stack answer">
+        <div class="panel">
+          <header><h2>3 · Cycle time</h2><span class="chip" id="ct-chip">estimate</span></header>
+          <div class="ct">
+            <div class="big"><span class="v" id="ct-big">–</span><span class="u">min / pc</span></div>
+            <div class="kv"><span class="k">Machine time</span><span class="v" id="ct-phys">–</span></div>
+            <div class="kv"><span class="k">Calibrated</span><span class="v" id="ct-cal">–</span></div>
+          </div>
+          <label class="f" for="ct-quote" style="margin-top:12px">Cycle time to quote (min) — change it to override
+            <input id="ct-quote" type="number" step="0.25" min="0">
+          </label>
+          <div id="ct-warn" class="status warn small" style="margin-top:10px" hidden></div>
+          <details style="margin-top:12px">
+            <summary>Operation-by-operation breakdown</summary>
+            <div class="tablewrap"><table><thead><tr><th>End</th><th>Operation</th><th class="num">Sec</th></tr></thead><tbody id="ops"></tbody></table></div>
+            <p class="small muted" id="ops-note" style="margin:8px 0 0"></p>
+          </details>
+        </div>
+
+        <div class="panel">
+          <header><h2>4 · Cost</h2><span class="small muted">Straight sheet</span></header>
+          <div class="fields" id="cost-fields"></div>
+          <label class="check" for="incl-nf" style="margin-top:10px"><input type="checkbox" id="incl-nf"> Include NUT|RED N and FERULE/WN in Net (the original sheet leaves them out)</label>
+          <hr class="rule">
+          <dl class="costlist" id="cost-out"></dl>
+          <div class="row" style="margin-top:14px">
+            <button class="btn primary" id="add-line" disabled>Add to quotation</button>
+            <button class="link small" id="save-ref-toggle">Save as reference part…</button>
+          </div>
+          <div id="save-ref" class="stack" style="gap:8px;margin-top:10px" hidden>
+            <label class="f" for="ref-actual">Measured / agreed cycle time (min)<input id="ref-actual" type="number" step="0.05" min="0.1"></label>
+            <label class="f" for="ref-src">Where the time comes from<input id="ref-src" value="Shop-floor time study"></label>
+            <div class="row"><button class="btn" id="save-ref-btn">Save reference</button><span class="small muted" id="save-ref-msg"></span></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="panel" style="margin-top:18px">
+      <header><h2>5 · Quotation</h2><span class="small muted" id="quote-note">Kept for you only, across visits.</span></header>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>#</th><th>Description</th><th class="num">Qty</th><th class="num">Y</th><th class="num">L</th><th class="num">Cycle time</th><th>TL</th><th class="num">Net ₹</th><th class="num">S.P. ₹</th><th class="num">Value ₹</th><th></th></tr></thead>
+          <tbody id="quote-body"></tbody>
+        </table>
+      </div>
+      <div class="qtotal">
+        <div><span class="small muted">Quotation total</span><div class="sum" id="quote-total">₹0.00</div></div>
+        <div class="row">
+          <button class="btn primary" id="xlsx" disabled>Download Excel</button>
+          <button class="btn" id="clear-quote" disabled>Clear</button>
+        </div>
+      </div>
+      <p class="small muted" id="xlsx-msg" style="margin:8px 0 0"></p>
+    </div>
+  </section>
+
+  <!-- ============================== REFERENCES ============================== -->
+  <section id="view-refs" hidden>
+    <div class="stack">
+      <div class="panel">
+        <header><h2>Calibration</h2><span class="chip" id="cal-mode"></span></header>
+        <p style="max-width:70ch;margin:0 0 12px">The physics model gives pure machine time. The shop's real cycle time also covers handling, deburring, inspection and the speeds actually used, so it is mapped with <span class="mono">cycle time = factor × machine time + overhead</span>, fitted live on the reference parts below. With fewer than <span id="min-pts"></span> parts only the factor is fitted.</p>
+        <div class="fields" style="max-width:820px">
+          <div class="kv"><span class="k">Factor</span><span class="v" id="cal-k">–</span></div>
+          <div class="kv"><span class="k">Overhead</span><span class="v" id="cal-h">–</span></div>
+          <div class="kv"><span class="k">Parts used</span><span class="v" id="cal-n">–</span></div>
+          <div class="kv"><span class="k">Mean error</span><span class="v" id="cal-mae">–</span></div>
+          <div class="kv"><span class="k">Leave-one-out error</span><span class="v" id="cal-loo">–</span></div>
+          <div class="kv"><span class="k">Quote-the-average error</span><span class="v" id="cal-base">–</span></div>
+        </div>
+        <div id="cal-warn" class="note-band" style="margin-top:12px" hidden>On these reference parts the model does not yet beat simply quoting the average cycle time. The reference times do not follow part geometry closely (near-identical parts were quoted 4.0 and 4.5 min). Add measured shop-floor times for more parts before relying on small differences.</div>
+        <label class="f" for="round-step" style="max-width:220px;margin-top:12px">Round quoted cycle time to (min)
+          <input id="round-step" type="number" step="0.05" min="0">
+        </label>
+      </div>
+      <div class="panel">
+        <header><h2>Reference parts</h2><span class="small muted" id="refs-note">Shared with everyone who uses this page.</span></header>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Use</th><th>Description</th><th class="num">Actual min</th><th class="num">Machine min</th><th class="num">Predicted</th><th class="num">Left-out pred.</th><th>Source</th><th></th></tr></thead>
+            <tbody id="refs-body"></tbody>
+          </table>
+        </div>
+        <p class="small muted" style="margin:10px 0 0">Add a part from the Quote tab with <em>Save as reference part</em> once its real cycle time is known.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== MACHINE ============================== -->
+  <section id="view-machine" hidden>
+    <div class="panel">
+      <header><h2 id="m-name">Machine</h2><span class="small muted" id="m-src"></span></header>
+      <p style="max-width:70ch;margin:0 0 14px">Shop timings and cutting data used by the physics model, for carbon steel (CS). Change them to match the floor; calibration refits automatically. Changes are shared with everyone who uses this page.</p>
+      <div class="fields" id="m-fields"></div>
+      <h3 style="margin:18px 0 10px">Cutting data · CS</h3>
+      <div class="cd-grid" id="m-cd"></div>
+      <div class="row" style="margin-top:16px">
+        <button class="btn primary" id="m-save">Save machine data</button>
+        <button class="btn" id="m-reset">Reset to defaults</button>
+        <span class="small muted" id="m-msg"></span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="engine.js"></script>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const el = (tag, props = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "class") n.className = v;
+    else if (k === "text") n.textContent = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else if (v !== undefined && v !== null && v !== false) n.setAttribute(k, v === true ? "" : v);
+  }
+  for (const c of kids) if (c != null) n.append(c);
+  return n;
+};
+const f2 = (x) => Number.isFinite(x) ? x.toFixed(2) : "–";
+const rs = (x) => "₹" + (Number.isFinite(x) ? x.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "–");
+const clone = (o) => JSON.parse(JSON.stringify(o));
+
+const COST_FIELDS = [
+  ["quantity", "Quantity", 1], ["raw_material_rate", "RM rate ₹/kg", 1], ["margin", "Mgn", 0.05],
+  ["caps", "Caps", 0.5], ["o_ring", "O Ring", 0.5], ["crimp_n", "Crimp N", 0.5],
+  ["nut_red_n", "NUT|RED N", 0.5], ["ferrule_wn", "FERULE/WN", 0.5], ["cn", "CN", 0.5],
+  ["was", "Was", 0.5], ["sr_ring", "SR Ring", 0.5],
+];
+const MACHINE_FIELDS = [
+  ["machining_rate_rs_per_min", "Machining rate ₹/min", 0.05], ["max_rpm", "Max spindle rpm", 100],
+  ["turret_stations", "Turret stations", 1], ["setups_per_part", "Setups per part", 1],
+  ["load_unload_s_per_setup", "Load / unload s per setup", 1], ["spindle_start_stop_s_per_setup", "Spindle start/stop s", 0.5],
+  ["tool_index_s", "Turret index s", 0.1], ["approach_retract_s_per_tool", "Approach / retract s per tool", 0.1],
+  ["facing_stock_per_side_mm", "Facing stock per side mm", 0.5],
+];
+const CD_LABELS = { vc: "Vc m/min", feed: "Feed mm/rev", doc: "Depth of cut mm", finish_feed: "Finish feed", infeed_per_pass: "Infeed / pass mm",
+  spring_passes: "Spring passes", return_s_per_pass: "Return s / pass", feed_per_mm_dia: "Feed per mm dia", peck_ratio: "Peck above L/D",
+  peck_penalty: "Peck factor", seconds_each: "Seconds each" };
+
+const state = {
+  machine: clone(HQ.DEFAULT_MACHINE),
+  refs: [],            // [{id, part, actual_cycle_time_min, source, use_for_calibration}]
+  refsLoaded: false,
+  roundingStep: 0.25,
+  cal: { ...HQ.DEFAULT_CALIBRATION },
+  draft: null,
+  draftSource: "",
+  cost: { ...HQ.DEFAULT_COST },
+  ctOverride: null,
+  includeNF: false,
+  quote: [],
+  est: null,
+  canWrite: null,
+};
+let db = null, uid = null, sample = null, downloads = null, sampleImages = null;
+
+// ---------------------------------------------------------------- tabs
+document.querySelectorAll("nav.tabs button").forEach((b) => b.addEventListener("click", () => {
+  document.querySelectorAll("nav.tabs button").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+  for (const v of ["quote", "refs", "machine"]) $("view-" + v).hidden = v !== b.dataset.tab;
+  try { localStorage.setItem("hq.tab", b.dataset.tab); } catch (e) {}
+}));
+try { const t = localStorage.getItem("hq.tab"); if (t) document.querySelector(`nav.tabs button[data-tab="${t}"]`)?.click(); } catch (e) {}
+
+// ---------------------------------------------------------------- calibration + facts
+function recalibrate() {
+  state.cal = HQ.calibrate(state.refs, state.machine, state.roundingStep);
+  renderFacts();
+  renderRefs();
+  renderEstimate();
+}
+function renderFacts() {
+  const c = state.cal;
+  $("facts").replaceChildren(
+    el("span", {}, "Machine ", el("b", { text: "LMW Smarturn" })),
+    el("span", {}, "Rate ", el("b", { text: `₹${state.machine.machining_rate_rs_per_min}/min` })),
+    el("span", {}, "Calibration ", el("b", { text: `×${c.cut_factor}${c.overhead_min ? ` + ${c.overhead_min} min` : ""}` })),
+    el("span", {}, "Reference parts ", el("b", { text: String(state.refs.length) })),
+  );
+}
+
+// ---------------------------------------------------------------- part editor
+function setDraft(part, source) {
+  state.draft = HQ.normalizePart(part);
+  state.draftSource = source;
+  state.ctOverride = null;
+  $("p-desc").value = state.draft.description;
+  $("p-dwg").value = state.draft.drawing_no;
+  $("p-rm").value = state.draft.material;
+  $("p-shape").value = state.draft.shape;
+  $("p-y").value = state.draft.bar_size;
+  $("p-l").value = state.draft.overall_length;
+  $("part-source").textContent = source;
+  const w = state.draft.warnings;
+  $("part-warnings").hidden = !w.length;
+  $("part-warnings").replaceChildren(el("strong", { text: "Check these on the drawing:" }), el("ul", { class: "warnings" }, ...w.map((t) => el("li", { text: t }))));
+  renderFeatures();
+  renderEstimate();
+}
+["p-desc", "p-dwg", "p-rm", "p-shape", "p-y", "p-l"].forEach((id) => $(id).addEventListener("input", () => {
+  if (!state.draft) setDraft({}, "Manual entry");
+  const d = state.draft;
+  d.description = $("p-desc").value.trim();
+  d.drawing_no = $("p-dwg").value.trim();
+  d.material = $("p-rm").value.trim() || "CS";
+  d.shape = $("p-shape").value;
+  d.bar_size = parseFloat($("p-y").value) || 0;
+  d.overall_length = parseFloat($("p-l").value) || 0;
+  renderEstimate();
+}));
+
+function renderFeatures() {
+  const body = $("feat-body");
+  body.replaceChildren();
+  const feats = state.draft ? state.draft.features : [];
+  if (!feats.length) {
+    body.append(el("tr", {}, el("td", { colspan: 8, class: "empty", text: state.draft ? "No features yet. Add the turned diameters, threads, grooves, holes and cones." : "Load a drawing or a reference part to see its features here." })));
+    return;
+  }
+  feats.forEach((f, i) => {
+    const upd = (key, parse) => (e) => { f[key] = parse(e.target.value); if (key === "end") tr.className = "end" + f.end; renderEstimate(); };
+    const numIn = (key, step) => el("td", { class: "num" }, el("input", { type: "number", step, min: 0, value: f[key], "aria-label": key, oninput: upd(key, (v) => Math.max(0, parseFloat(v) || 0)) }));
+    const endSel = el("select", { class: "end", "aria-label": "End", onchange: upd("end", String) }, el("option", { value: "A", text: "A" }), el("option", { value: "B", text: "B" }));
+    endSel.value = f.end;
+    const typeSel = el("select", { class: "type", "aria-label": "Feature type", onchange: upd("type", String) }, ...HQ.FEATURE_TYPES.map((t) => el("option", { value: t, text: t })));
+    typeSel.value = f.type;
+    const tr = el("tr", { class: "end" + f.end },
+      el("td", {}, endSel), el("td", {}, typeSel), numIn("dia", 0.1), numIn("length", 0.5), numIn("pitch", 0.001),
+      el("td", { class: "num" }, el("input", { type: "number", step: 1, min: 1, value: f.qty, "aria-label": "Qty", oninput: upd("qty", (v) => Math.max(1, Math.round(parseFloat(v) || 1))) })),
+      el("td", { class: "note" }, el("input", { value: f.note, "aria-label": "Note", oninput: upd("note", String) })),
+      el("td", {}, el("button", { class: "icon", title: "Remove feature", "aria-label": "Remove feature", text: "×", onclick: () => { feats.splice(i, 1); renderFeatures(); renderEstimate(); } })),
+    );
+    body.append(tr);
+  });
+}
+$("addfeat").addEventListener("click", () => {
+  if (!state.draft) setDraft({ features: [] }, "Manual entry");
+  const last = state.draft.features[state.draft.features.length - 1];
+  state.draft.features.push({ end: last ? last.end : "A", type: "turn", dia: 10, length: 5, pitch: 0, qty: 1, note: "" });
+  renderFeatures();
+  renderEstimate();
+  const rows = $("feat-body").querySelectorAll("tr");
+  rows[rows.length - 1]?.querySelector("select:nth-child(1)")?.focus();
+});
+$("blank").addEventListener("click", () => {
+  clearDrawing();
+  setDraft({ description: "", bar_size: 19, overall_length: 30, features: [] }, "Manual entry");
+  $("p-desc").focus();
+});
+
+// ---------------------------------------------------------------- estimate + cost
+COST_FIELDS.forEach(([key, label, step]) => {
+  $("cost-fields").append(el("label", { class: "f", for: "c-" + key }, label,
+    el("input", { id: "c-" + key, type: "number", step, min: 0, value: state.cost[key], oninput: (e) => { state.cost[key] = Math.max(0, parseFloat(e.target.value) || 0); renderCost(); } })));
+});
+$("incl-nf").addEventListener("change", (e) => { state.includeNF = e.target.checked; renderCost(); renderQuote(); });
+$("ct-quote").addEventListener("input", (e) => {
+  const v = parseFloat(e.target.value);
+  state.ctOverride = Number.isFinite(v) && state.est && Math.abs(v - state.est.rounded_min) > 1e-9 ? v : null;
+  $("ct-chip").textContent = state.ctOverride == null ? "estimate" : "manual";
+  renderCost();
+});
+
+function quotedCt() {
+  if (!state.est) return 0;
+  return state.ctOverride == null ? state.est.rounded_min : state.ctOverride;
+}
+
+function renderEstimate() {
+  const d = state.draft;
+  if (!d || !(d.bar_size > 0)) {
+    state.est = null;
+    $("ct-big").textContent = "–"; $("ct-phys").textContent = "–"; $("ct-cal").textContent = "–";
+    $("ct-quote").value = ""; $("ops").replaceChildren(); $("ct-warn").hidden = true;
+    renderCost();
+    return;
+  }
+  const e = HQ.estimateCycleTime(d, state.machine, state.cal);
+  state.est = e;
+  $("ct-big").textContent = String(Number(e.rounded_min.toFixed(2)));
+  $("ct-phys").textContent = f2(e.physics_min) + " min";
+  $("ct-cal").textContent = f2(e.cycle_time_min) + " min";
+  if (document.activeElement !== $("ct-quote")) $("ct-quote").value = state.ctOverride == null ? e.rounded_min : state.ctOverride;
+  $("ct-chip").textContent = state.ctOverride == null ? "estimate" : "manual";
+  $("ct-warn").hidden = !e.warnings.length;
+  $("ct-warn").textContent = e.warnings.join(" ");
+  $("ops").replaceChildren(...[...e.operations, ...e.noncut].map((o) =>
+    el("tr", { title: o.detail ? `${o.tool} · ${o.detail}` : o.tool }, el("td", { text: o.end }), el("td", { text: o.operation }), el("td", { class: "num", text: o.cut_s.toFixed(1) }))));
+  $("ops-note").textContent = `Cutting ${e.cutting_s.toFixed(0)} s + non-cutting ${e.noncut_s.toFixed(0)} s = ${f2(e.physics_min)} min; × ${e.cut_factor}${e.overhead_min ? ` + ${e.overhead_min} min` : ""} calibration = ${f2(e.cycle_time_min)} min, rounded to the nearest ${state.roundingStep || "–"} min.`;
+  renderCost();
+}
+
+function renderCost() {
+  const d = state.draft;
+  $("add-line").disabled = !(d && d.description && state.est);
+  if (!d || !state.est) { $("cost-out").replaceChildren(el("dt", { text: "Load a part to cost it." }), el("dd")); return; }
+  const c = HQ.computeCost(d, state.cost, quotedCt(), state.machine.machining_rate_rs_per_min, state.includeNF);
+  const rows = [
+    ["RM weight", (c.rm_weight_kg * 1000).toFixed(1) + " g"], ["RM cost", rs(c.rm_cost)], ["Cutting", rs(c.cutting)],
+    ["Machining", rs(c.machining)], ["Plating", rs(c.plating)], ["Bought-out items", rs(c.bought_out)],
+  ];
+  $("cost-out").replaceChildren(
+    ...rows.flatMap(([k, v]) => [el("dt", { text: k }), el("dd", { text: v })]),
+    el("dt", { class: "total", text: "Net" }), el("dd", { class: "total", text: rs(c.net) }),
+    el("dt", { text: `S.P. per piece (× ${state.cost.margin})` }), el("dd", { class: "sp", text: rs(c.selling_price) }),
+    el("dt", { text: `Value for ${state.cost.quantity} pcs` }), el("dd", { text: rs(c.total_value) }),
+  );
+}
+
+// ---------------------------------------------------------------- quotation
+$("add-line").addEventListener("click", () => {
+  const e = state.est;
+  const manual = state.ctOverride != null;
+  state.quote.push({ part: clone(state.draft), cost: { ...state.cost }, cycle_time_min: quotedCt(),
+    cycle_time_source: manual ? "manual" : "estimated", estimate: manual ? null : clone(e) });
+  renderQuote(); saveQuote();
+});
+$("clear-quote").addEventListener("click", () => {
+  if ($("clear-quote").dataset.armed) { state.quote = []; renderQuote(); saveQuote(); return; }
+  $("clear-quote").dataset.armed = "1"; $("clear-quote").textContent = "Click again to clear";
+  setTimeout(() => { delete $("clear-quote").dataset.armed; $("clear-quote").textContent = "Clear"; }, 3000);
+});
+function renderQuote() {
+  const body = $("quote-body");
+  body.replaceChildren();
+  let total = 0;
+  state.quote.forEach((l, i) => {
+    const c = HQ.computeCost(l.part, l.cost, l.cycle_time_min, state.machine.machining_rate_rs_per_min, state.includeNF);
+    total += c.total_value;
+    body.append(el("tr", {},
+      el("td", { class: "num", text: String(i + 1) }), el("td", { text: l.part.description }),
+      el("td", { class: "num", text: String(l.cost.quantity) }), el("td", { class: "num", text: String(l.part.bar_size) }),
+      el("td", { class: "num", text: String(l.part.overall_length) }), el("td", { class: "num", text: f2(l.cycle_time_min) }),
+      el("td", {}, el("span", { class: l.cycle_time_source === "manual" ? "chip steel" : "chip", text: l.cycle_time_source })),
+      el("td", { class: "num", text: f2(c.net) }), el("td", { class: "num", text: f2(c.selling_price) }), el("td", { class: "num", text: f2(c.total_value) }),
+      el("td", {}, el("button", { class: "icon", title: "Remove line", "aria-label": "Remove line", text: "×", onclick: () => { state.quote.splice(i, 1); renderQuote(); saveQuote(); } })),
+    ));
+  });
+  if (!state.quote.length) body.append(el("tr", {}, el("td", { colspan: 11, class: "empty", text: "No lines yet. Cost a part above and choose Add to quotation." })));
+  $("quote-total").textContent = rs(total);
+  $("xlsx").disabled = !state.quote.length || !downloads || typeof XLSX === "undefined";
+  $("clear-quote").disabled = !state.quote.length;
+}
+let quoteTimer = null;
+function saveQuote() {
+  try { localStorage.setItem("hq.quote", JSON.stringify(state.quote)); } catch (e) {}
+  if (!db || !uid) return;
+  clearTimeout(quoteTimer);
+  quoteTimer = setTimeout(() => {
+    db.doc(`data/users/${uid}/quote`).set({ lines: state.quote, updated: new Date().toISOString() }).catch(() => {});
+  }, 600);
+}
+$("xlsx").addEventListener("click", async () => {
+  $("xlsx-msg").textContent = "";
+  try {
+    const bytes = HQ.buildWorkbook(XLSX, state.quote, state.machine.machining_rate_rs_per_min);
+    const stamp = new Date().toISOString().slice(0, 10);
+    await downloads.save({ filename: `Hydromatik quotation ${stamp}.xlsx`, data: new Uint8Array(bytes) });
+    $("xlsx-msg").textContent = "Saved. The Straight sheet keeps the original formulas; the TL breakdown sheet lists every operation.";
+  } catch (e) {
+    const code = e && e.code;
+    $("xlsx-msg").textContent = code === "declined" ? "Download cancelled." : code === "rate_limited" ? "A download prompt is already open." : "The Excel file could not be saved in this view.";
+  }
+});
+
+// ---------------------------------------------------------------- reference parts
+function refLabel(r) { return `${r.part.description} · ${r.actual_cycle_time_min} min`; }
+function renderRefPicker() {
+  const sel = $("refpick");
+  const prev = sel.value;
+  sel.replaceChildren(...(state.refs.length
+    ? state.refs.map((r) => el("option", { value: r.id, text: refLabel(r) }))
+    : [el("option", { value: "", text: state.refsLoaded ? "No reference parts yet" : "Loading reference parts…" })]));
+  if (prev && state.refs.some((r) => r.id === prev)) sel.value = prev;
+  $("loadref").disabled = !state.refs.length;
+}
+$("loadref").addEventListener("click", () => {
+  const r = state.refs.find((x) => x.id === $("refpick").value);
+  if (r) { clearDrawing(); setDraft(clone(r.part), `Reference part · ${r.actual_cycle_time_min} min actual`); }
+});
+
+function renderRefs() {
+  const c = state.cal;
+  $("min-pts").textContent = String(HQ.MIN_POINTS_FOR_TWO_PARAMS);
+  $("cal-mode").textContent = c.mode;
+  $("cal-k").textContent = String(c.cut_factor);
+  $("cal-h").textContent = `${c.overhead_min} min`;
+  $("cal-n").textContent = String(c.n_parts);
+  $("cal-mae").textContent = c.mae_min == null ? "–" : `${c.mae_min} min`;
+  $("cal-loo").textContent = c.loo_mae_min == null ? "–" : `${c.loo_mae_min} min`;
+  $("cal-base").textContent = c.baseline_loo_mae_min == null ? "–" : `${c.baseline_loo_mae_min} min`;
+  $("cal-warn").hidden = !(c.loo_mae_min != null && c.baseline_loo_mae_min != null && c.loo_mae_min > c.baseline_loo_mae_min);
+  if (document.activeElement !== $("round-step")) $("round-step").value = state.roundingStep;
+
+  const resid = new Map(c.residuals.map((r) => [r.description, r]));
+  const body = $("refs-body");
+  body.replaceChildren();
+  if (!state.refs.length) {
+    body.append(el("tr", {}, el("td", { colspan: 8, class: "empty", text: state.refsLoaded ? "No reference parts yet. Save one from the Quote tab once its real cycle time is known." : (db ? "Loading reference parts…" : "Reference parts are stored for signed-in viewers only.") })));
+    return;
+  }
+  const ro = state.canWrite === false;
+  for (const r of state.refs) {
+    const phys = HQ.estimateCycleTime(r.part, state.machine).physics_min;
+    const res = r.use_for_calibration !== false ? resid.get(r.part.description) : null;
+    body.append(el("tr", {},
+      el("td", {}, el("input", { type: "checkbox", checked: r.use_for_calibration !== false, disabled: ro, "aria-label": "Use for calibration",
+        onchange: (e) => writeRef(r, { use_for_calibration: e.target.checked }) })),
+      el("td", { text: r.part.description }),
+      el("td", { class: "num" }, el("input", { type: "number", step: 0.05, min: 0.1, value: r.actual_cycle_time_min, disabled: ro, style: "width:80px;text-align:right", "aria-label": "Actual cycle time",
+        onchange: (e) => { const v = parseFloat(e.target.value); if (v > 0) writeRef(r, { actual_cycle_time_min: v }); } })),
+      el("td", { class: "num", text: f2(phys) }),
+      el("td", { class: "num", text: res ? f2(res.predicted_min) : "–" }),
+      el("td", { class: "num", text: res && res.loo_predicted_min != null ? f2(res.loo_predicted_min) : "–" }),
+      el("td", { class: "small muted", text: r.source || "" }),
+      el("td", {}, ro ? null : delButton(r)),
+    ));
+  }
+}
+function delButton(r) {
+  const b = el("button", { class: "icon", title: "Delete reference part", "aria-label": "Delete reference part", text: "×" });
+  b.addEventListener("click", () => {
+    if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = "Delete?"; b.style.fontSize = "12px"; setTimeout(() => { delete b.dataset.armed; b.textContent = "×"; b.style.fontSize = ""; }, 3000); return; }
+    db.doc("references/" + r.id).delete().catch(() => {});
+  });
+  return b;
+}
+function writeRef(r, patch) {
+  if (!db) return;
+  db.doc("references/" + r.id).update(patch).catch((e) => { if (e && e.code === "invalid_argument") { state.canWrite = false; renderRefs(); } });
+}
+$("round-step").addEventListener("change", (e) => {
+  const v = Math.max(0, parseFloat(e.target.value) || 0);
+  state.roundingStep = v;
+  recalibrate();
+  if (db && state.canWrite !== false) db.doc("settings/calibration").set({ rounding_step_min: v }).catch(() => {});
+});
+
+$("save-ref-toggle").addEventListener("click", () => {
+  $("save-ref").hidden = !$("save-ref").hidden;
+  if (!$("save-ref").hidden) { $("ref-actual").value = quotedCt() || ""; $("ref-actual").focus(); }
+});
+$("save-ref-btn").addEventListener("click", async () => {
+  const msg = $("save-ref-msg");
+  const actual = parseFloat($("ref-actual").value);
+  if (!state.draft || !state.draft.description) { msg.textContent = "Give the part a description first."; return; }
+  if (!(actual > 0)) { msg.textContent = "Enter the measured cycle time in minutes."; return; }
+  if (!db) { msg.textContent = "Saving needs you to be signed in to Claude."; return; }
+  const norm = (t) => t.replace(/\s+/g, " ").trim().toUpperCase();
+  const existing = state.refs.find((r) => norm(r.part.description) === norm(state.draft.description));
+  const id = existing ? existing.id
+    : state.draft.description.replace(/[^A-Za-z0-9.-]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 120) || "part";
+  try {
+    await db.doc("references/" + id).set({ part: clone(state.draft), actual_cycle_time_min: actual,
+      source: $("ref-src").value.trim(), use_for_calibration: true, added: new Date().toISOString() });
+    msg.textContent = existing ? `Updated the existing reference for ${existing.part.description}. Calibration refitted.`
+      : "Saved. Calibration has been refitted.";
+  } catch (e) {
+    msg.textContent = e && e.code === "invalid_argument" ? "You can view this page but not change its shared data." : "Could not save right now. Try again.";
+  }
+});
+
+// ---------------------------------------------------------------- machine
+function renderMachine() {
+  const m = state.machine;
+  $("m-name").textContent = m.name;
+  $("m-src").textContent = m.source;
+  $("m-fields").replaceChildren(...MACHINE_FIELDS.map(([key, label, step]) =>
+    el("label", { class: "f", for: "m-" + key }, label, el("input", { id: "m-" + key, type: "number", step, min: 0, value: m[key], "data-key": key }))));
+  const cs = m.cutting_data.CS;
+  $("m-cd").replaceChildren(...Object.entries(cs).map(([op, vals]) =>
+    el("fieldset", {}, el("legend", { text: op.replace("_", " ") }),
+      ...Object.entries(vals).map(([k, v]) => el("label", { class: "f", for: `cd-${op}-${k}` }, CD_LABELS[k] || k,
+        el("input", { id: `cd-${op}-${k}`, type: "number", step: "any", min: 0, value: v, "data-op": op, "data-k": k })))) ));
+  const ro = state.canWrite === false || !db;
+  $("m-save").disabled = ro; $("m-reset").disabled = ro;
+  if (ro) $("m-msg").textContent = !db ? "Sign in to Claude to change shared machine data." : "You can view this page but not change its shared data.";
+}
+function machineFromForm() {
+  const m = clone(state.machine);
+  document.querySelectorAll("#m-fields input").forEach((i) => { const v = parseFloat(i.value); if (Number.isFinite(v) && v >= 0) m[i.dataset.key] = v; });
+  document.querySelectorAll("#m-cd input").forEach((i) => { const v = parseFloat(i.value); if (Number.isFinite(v) && v >= 0) m.cutting_data.CS[i.dataset.op][i.dataset.k] = v; });
+  m.max_rpm = Math.max(100, m.max_rpm); m.setups_per_part = Math.max(1, Math.round(m.setups_per_part));
+  m.turret_stations = Math.max(1, Math.round(m.turret_stations));
+  return m;
+}
+$("m-save").addEventListener("click", async () => {
+  const m = machineFromForm();
+  try { await db.doc("settings/machine").set({ profile: m, updated: new Date().toISOString() }); $("m-msg").textContent = "Saved for everyone. Calibration refitted."; }
+  catch (e) { $("m-msg").textContent = e && e.code === "invalid_argument" ? "You can view this page but not change its shared data." : "Could not save right now. Try again."; }
+});
+$("m-reset").addEventListener("click", async () => {
+  try { await db.doc("settings/machine").delete(); $("m-msg").textContent = "Reset to the built-in Smarturn defaults."; } catch (e) { $("m-msg").textContent = "Could not reset right now."; }
+});
+
+// ---------------------------------------------------------------- drawing reading
+let readCtl = null;
+const fileInput = $("file");
+const drop = $("drop");
+["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", (e) => { if (e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; onFile(); } });
+fileInput.addEventListener("change", onFile);
+
+let prepared = null; // {name, images: Blob[], text, previewUrl}
+async function onFile() {
+  const file = fileInput.files[0];
+  prepared = null;
+  updateReadButton();
+  if (!file) return;
+  status(`Preparing ${file.name}…`);
+  try {
+    prepared = await prepareDrawing(file);
+    showPreview(prepared.previewUrl);
+    status(`${file.name} is ready.${sampleImages ? " Choose Read drawing." : ""}`, "good");
+  } catch (e) {
+    status(`Could not open ${file.name}: ${e.message || e}. Try a PDF exported from CAD, or a PNG/JPG scan.`, "bad");
+  }
+  updateReadButton();
+}
+
+async function canvasBlob(canvas, type = "image/png") {
+  return new Promise((res, rej) => canvas.toBlob((b) => (b ? res(b) : rej(new Error("render failed"))), type));
+}
+async function tiles(source, w, h) {
+  // Full sheet plus a 2x2 grid of overlapping tiles, so dimension text stays legible after downscaling.
+  const out = [];
+  const full = document.createElement("canvas");
+  const s = Math.min(1, 2000 / Math.max(w, h));
+  full.width = Math.round(w * s); full.height = Math.round(h * s);
+  full.getContext("2d").drawImage(source, 0, 0, full.width, full.height);
+  out.push(await canvasBlob(full));
+  const tw = Math.round(w * 0.55), th = Math.round(h * 0.55);
+  for (const [x, y] of [[0, 0], [w - tw, 0], [0, h - th], [w - tw, h - th]]) {
+    const c = document.createElement("canvas");
+    c.width = tw; c.height = th;
+    const g = c.getContext("2d");
+    g.fillStyle = "#fff"; g.fillRect(0, 0, tw, th);
+    g.drawImage(source, x, y, tw, th, 0, 0, tw, th);
+    out.push(await canvasBlob(c));
+  }
+  return out;
+}
+async function prepareDrawing(file) {
+  const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+  if (isPdf) {
+    if (typeof pdfjsLib === "undefined") throw new Error("the PDF reader did not load");
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()), isEvalSupported: false, disableFontFace: false }).promise;
+    const page = await pdf.getPage(1);
+    const base = page.getViewport({ scale: 1 });
+    const scale = 3200 / Math.max(base.width, base.height);
+    const vp = page.getViewport({ scale });
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(vp.width); canvas.height = Math.round(vp.height);
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+    const tc = await page.getTextContent();
+    const text = tc.items.map((i) => i.str).filter((s) => s && s.trim()).join("\n");
+    const images = await tiles(canvas, canvas.width, canvas.height);
+    return { name: file.name, images, text, previewUrl: URL.createObjectURL(images[0]) };
+  }
+  const bmp = await createImageBitmap(file);
+  const images = await tiles(bmp, bmp.width, bmp.height);
+  return { name: file.name, images, text: "", previewUrl: URL.createObjectURL(images[0]) };
+}
+function showPreview(url) {
+  $("drawing").replaceChildren(el("img", { src: url, alt: "Uploaded drawing", onclick: () => $("drawing").classList.toggle("zoom") }));
+  $("drawing-box").hidden = false;
+}
+function clearDrawing() {
+  // The preview belongs to an uploaded drawing; hide it when the part comes from elsewhere.
+  $("drawing-box").hidden = true;
+  status("");
+}
+function status(text, kind) {
+  const s = $("read-status");
+  s.hidden = !text; s.textContent = text || ""; s.className = "status" + (kind ? " " + kind : "");
+}
+function updateReadButton() {
+  $("read").disabled = !(prepared && sampleImages && !readCtl);
+}
+const READ_ERRORS = {
+  not_granted: "Claude was not allowed for this page, so drawings can't be read here. Enter the features by hand.",
+  sampling_disabled: "Claude isn't available for this account. Enter the features by hand.",
+  rate_limited: "Too many requests just now, or your Claude usage limit was reached. Try again in a little while.",
+  image_rejected: "This file could not be sent to Claude. Try a PDF or a clearer PNG/JPG.",
+  refused: "Claude declined to read this file.",
+  invalid_json: "Claude's answer could not be turned into a feature list. Try again.",
+  session_expired: "Your Claude session expired. Reload the page and sign in again.",
+  prompt_too_large: "The drawing has too much text to send. Try a single-sheet PDF.",
+};
+$("read").addEventListener("click", async () => {
+  if (!prepared || !sample) return;
+  readCtl = new AbortController();
+  $("stop").hidden = false; updateReadButton();
+  status("Claude is reading the drawing. This usually takes 30–90 seconds…");
+  const maxImgs = (sampleImages && sampleImages.maxCount) || 1;
+  const imgs = prepared.images.slice(0, Math.max(1, maxImgs));
+  const note = imgs.length > 1 ? "Image 1 is the whole sheet; the others are enlarged quarters of it (top-left, top-right, bottom-left, bottom-right) so small dimension text is legible." : "The image is the whole drawing sheet.";
+  try {
+    const out = await sample.json(HQ.extractionPrompt(prepared.name, prepared.text, note), { images: imgs, modelTier: "complex", signal: readCtl.signal });
+    if (!out || typeof out !== "object" || Array.isArray(out)) throw { code: "invalid_json" };
+    setDraft(out, `Read from ${prepared.name} by Claude`);
+    showPreview(prepared.previewUrl);
+    status(`Read ${state.draft.features.length} features from ${prepared.name}. Check them against the drawing before quoting.`, "good");
+  } catch (e) {
+    const code = e && e.code;
+    if (code === "cancelled") status("Stopped.");
+    else status(READ_ERRORS[code] || "Claude could not finish reading the drawing. Try again.", "bad");
+    if (code === "not_granted" || code === "sampling_disabled") { sampleImages = null; $("reader-note").textContent = "Drawing reading is off in this view."; }
+  } finally {
+    readCtl = null; $("stop").hidden = true; updateReadButton();
+  }
+});
+$("stop").addEventListener("click", () => readCtl && readCtl.abort());
+
+// ---------------------------------------------------------------- startup
+renderFacts(); renderRefPicker(); renderRefs(); renderMachine(); renderFeatures(); renderEstimate();
+try { const q = JSON.parse(localStorage.getItem("hq.quote") || "[]"); if (Array.isArray(q)) state.quote = q; } catch (e) {}
+renderQuote();
+$("reader-note").textContent = "Connecting to Claude…";
+
+(async () => {
+  const c = window.claude;
+  if (!c || !c.use) { $("reader-note").textContent = "Drawing reading needs the page opened in Claude."; return; }
+
+  c.use("downloads").then((d) => { downloads = d; renderQuote(); if (!d) $("xlsx-msg").textContent = "Excel download is not available in this view."; });
+
+  c.use("sample").then(async (s) => {
+    sample = s;
+    if (!s) { $("reader-note").textContent = "Drawing reading is not available here. Enter features by hand."; return; }
+    const lim = await s.limits().catch(() => null);
+    sampleImages = lim && lim.images ? lim.images : null;
+    $("reader-note").textContent = sampleImages ? "Uses your Claude account." : "This view can't send images to Claude. Enter features by hand.";
+    updateReadButton();
+  });
+
+  const [d, u] = await Promise.all([c.use("db"), c.use("user")]);
+  db = d;
+  if (u) {
+    uid = await u.id().catch(() => null);
+    const w = await Promise.resolve(u.can("data.write")).catch(() => null);
+    state.canWrite = w === null || w === undefined ? null : !!w;
+  }
+  if (!db) {
+    state.refsLoaded = true;
+    $("refs-note").textContent = "Reference parts and machine changes are stored for signed-in viewers only.";
+    $("quote-note").textContent = "Kept in this browser only.";
+    renderRefPicker(); renderRefs(); renderMachine();
+    return;
+  }
+  renderMachine();
+
+  db.doc("settings/machine").onSnapshot((snap) => {
+    const p = snap.exists ? snap.data().profile : null;
+    state.machine = p && p.cutting_data && p.cutting_data.CS ? clone(p) : clone(HQ.DEFAULT_MACHINE);
+    renderMachine(); recalibrate(); renderQuote();
+  }, () => {});
+  db.doc("settings/calibration").onSnapshot((snap) => {
+    const v = snap.exists ? Number(snap.data().rounding_step_min) : 0.25;
+    state.roundingStep = Number.isFinite(v) && v >= 0 ? v : 0.25;
+    recalibrate();
+  }, () => {});
+  db.collection("references").onSnapshot((snap) => {
+    state.refs = snap.docs.map((doc) => {
+      const v = doc.data();
+      return { id: doc.id, part: HQ.normalizePart(v.part), actual_cycle_time_min: Number(v.actual_cycle_time_min) || 0,
+        source: v.source ? String(v.source) : "", use_for_calibration: v.use_for_calibration !== false };
+    }).sort((a, b) => a.part.description.localeCompare(b.part.description));
+    state.refsLoaded = true;
+    renderRefPicker(); recalibrate();
+    if (!state.draft && state.refs.length) {
+      const ex = state.refs.find((r) => /^G 10/.test(r.part.description)) || state.refs[0];
+      $("refpick").value = ex.id;
+      setDraft(clone(ex.part), `Example · reference part (${ex.actual_cycle_time_min} min actual)`);
+    }
+  }, () => { state.refsLoaded = true; renderRefPicker(); renderRefs(); });
+
+  if (uid) {
+    db.doc(`data/users/${uid}/quote`).get().then((snap) => {
+      if (snap.exists && Array.isArray(snap.data().lines) && snap.data().lines.length) { state.quote = clone(snap.data().lines); renderQuote(); }
+    }).catch(() => {});
+  } else {
+    $("quote-note").textContent = "Kept in this browser only.";
+  }
+})();
+</script>
