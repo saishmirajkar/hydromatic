@@ -1,0 +1,48 @@
+{
+  "cut_factor": 2.1337,
+  "overhead_min": 0.0,
+  "rounding_step_min": 0.25,
+  "mode": "factor only",
+  "n_parts": 5,
+  "mae_min": 0.499,
+  "loo_mae_min": 0.623,
+  "baseline_loo_mae_min": 0.4,
+  "fitted_on": "2026-10-14",
+  "residuals": [
+    {
+      "description": "EGE 12 X 1/4 - L - ED",
+      "actual_min": 5.0,
+      "physics_min": 1.902,
+      "predicted_min": 4.058,
+      "loo_predicted_min": 3.863
+    },
+    {
+      "description": "GE 10 X 1/4 - L - A",
+      "actual_min": 4.5,
+      "physics_min": 1.957,
+      "predicted_min": 4.175,
+      "loo_predicted_min": 4.103
+    },
+    {
+      "description": "GE 12 X 3/8 - L - B",
+      "actual_min": 4.5,
+      "physics_min": 2.084,
+      "predicted_min": 4.446,
+      "loo_predicted_min": 4.432
+    },
+    {
+      "description": "GE 12 X M16 X 1.5 - L - ED",
+      "actual_min": 4.0,
+      "physics_min": 2.208,
+      "predicted_min": 4.711,
+      "loo_predicted_min": 4.925
+    },
+    {
+      "description": "G 10 - S",
+      "actual_min": 4.0,
+      "physics_min": 2.092,
+      "predicted_min": 4.464,
+      "loo_predicted_min": 4.586
+    }
+  ]
+}

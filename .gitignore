@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+.streamlit/secrets.toml
+
+# Client drawings, cost sheet and vendor quotation: kept out of the (public) repo
+samples/

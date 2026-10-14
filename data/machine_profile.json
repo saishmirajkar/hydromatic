@@ -1,0 +1,27 @@
+{
+  "name": "LMW Smarturn CNC lathe (Fanuc 0i-TF)",
+  "source": "LMW quotation Ref-LMW/SP/266 dated 04/02/2021 (8 machines)",
+  "max_rpm": 4500,
+  "spindle_power_kw": 5.5,
+  "turret_stations": 8,
+  "chuck_mm": 165,
+  "machining_rate_rs_per_min": 3.75,
+  "setups_per_part": 2,
+  "load_unload_s_per_setup": 15.0,
+  "spindle_start_stop_s_per_setup": 3.0,
+  "tool_index_s": 1.0,
+  "approach_retract_s_per_tool": 2.0,
+  "facing_stock_per_side_mm": 3.0,
+  "cutting_data": {
+    "CS": {
+      "turn":     {"vc": 180, "feed": 0.20, "doc": 1.5, "finish_feed": 0.10},
+      "face":     {"vc": 160, "feed": 0.15, "doc": 1.5},
+      "groove":   {"vc": 90,  "feed": 0.05},
+      "thread":   {"vc": 100, "infeed_per_pass": 0.12, "spring_passes": 1, "return_s_per_pass": 0.6},
+      "drill":    {"vc": 70,  "feed_per_mm_dia": 0.015, "peck_ratio": 3.0, "peck_penalty": 1.4},
+      "bore":     {"vc": 140, "feed": 0.10, "doc": 1.0},
+      "chamfer":  {"seconds_each": 1.5},
+      "hex_chamfer": {"seconds_each": 2.5}
+    }
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "part": {
+    "description": "EGE 12 X 1/4 - L - ED",
+    "drawing_no": "0108-12-04-L-ED",
+    "material": "CS",
+    "shape": "S",
+    "bar_size": 19,
+    "overall_length": 38,
+    "features": [
+      {
+        "end": "A",
+        "type": "drill",
+        "dia": 6,
+        "length": 38,
+        "pitch": 0,
+        "qty": 1,
+        "note": "through hole"
+      },
+      {
+        "end": "A",
+        "type": "bore",
+        "dia": 8,
+        "length": 4,
+        "pitch": 0,
+        "qty": 1,
+        "note": "port bore"
+      },
+      {
+        "end": "A",
+        "type": "turn",
+        "dia": 13.157,
+        "length": 12,
+        "pitch": 0,
+        "qty": 1,
+        "note": "G1/4 BSP thread OD"
+      },
+      {
+        "end": "A",
+        "type": "thread_ext",
+        "dia": 13.157,
+        "length": 9,
+        "pitch": 1.337,
+        "qty": 1,
+        "note": "G1/4 BSP"
+      },
+      {
+        "end": "A",
+        "type": "groove",
+        "dia": 11.2,
+        "length": 3,
+        "pitch": 0,
+        "qty": 1,
+        "note": "thread undercut"
+      },
+      {
+        "end": "A",
+        "type": "turn",
+        "dia": 16.6,
+        "length": 2,
+        "pitch": 0,
+        "qty": 1,
+        "note": "ED seal spigot"
+      },
+      {
+        "end": "A",
+        "type": "groove",
+        "dia": 14.0,
+        "length": 1.1,
+        "pitch": 0,
+        "qty": 1,
+        "note": "ED seal recess"
+      },
+      {
+        "end": "A",
+        "type": "chamfer",
+        "dia": 13.157,
+        "length": 0,
+        "pitch": 0,
+        "qty": 1,
+        "note": "1.5x30 deg"
+      },
+      {
+        "end": "A",
+        "type": "hex_chamfer",
+        "dia": 19,
+        "length": 0,
+        "pitch": 0,
+        "qty": 1,
+        "note": ""
+      },
+      {
+        "end": "B",
+        "type": "turn",
+        "dia": 15.5,
+        "length": 19,
+        "pitch": 0,
+        "qty": 1,
+        "note": "male 24 deg cone body"
+      },
+      {
+        "end": "B",
+        "type": "taper_ext",
+        "dia": 14.5,
+        "length": 6,
+        "pitch": 0,
+        "qty": 1,
+        "note": "male 24 deg cone"
+      },
+      {
+        "end": "B",
+        "type": "groove",
+        "dia": 11.8,
+        "length": 1.9,
+        "pitch": 0,
+        "qty": 1,
+        "note": "O-ring groove"
+      },
+      {
+        "end": "B",
+        "type": "groove",
+        "dia": 13.2,
+        "length": 2.5,
+        "pitch": 0,
+        "qty": 1,
+        "note": "relief groove"
+      },
+      {
+        "end": "B",
+        "type": "bore",
+        "dia": 8,
+        "length": 10.5,
+        "pitch": 0,
+        "qty": 1,
+        "note": "bore"
+      },
+      {
+        "end": "B",
+        "type": "chamfer",
+        "dia": 14.5,
+        "length": 0,
+        "pitch": 0,
+        "qty": 1,
+        "note": ""
+      },
+      {
+        "end": "B",
+        "type": "hex_chamfer",
+        "dia": 19,
+        "length": 0,
+        "pitch": 0,
+        "qty": 1,
+        "note": ""
+      }
+    ],
+    "warnings": [
+      "Manual transcription: EGE male cone end geometry approximated."
+    ]
+  },
+  "actual_cycle_time_min": 5.0,
+  "source": "Straight sheet row 2, cost sheet saish (1).xlsx; features transcribed manually from drawing EGE 12X1-4 -L-ED .pdf",
+  "use_for_calibration": true
+}

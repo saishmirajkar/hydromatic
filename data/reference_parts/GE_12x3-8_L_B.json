@@ -1,0 +1,151 @@
+{
+  "part": {
+    "description": "GE 12 X 3/8 - L - B",
+    "drawing_no": "0021-12-06-L-B",
+    "material": "CS",
+    "shape": "S",
+    "bar_size": 22,
+    "overall_length": 31.5,
+    "features": [
+      {
+        "end": "A",
+        "type": "drill",
+        "dia": 9,
+        "length": 31.5,
+        "pitch": 0,
+        "qty": 1,
+        "note": "through hole"
+      },
+      {
+        "end": "A",
+        "type": "bore",
+        "dia": 11,
+        "length": 3,
+        "pitch": 0,
+        "qty": 1,
+        "note": "port bore"
+      },
+      {
+        "end": "A",
+        "type": "turn",
+        "dia": 21,
+        "length": 1,
+        "pitch": 0,
+        "qty": 1,
+        "note": "B-type sealing face"
+      },
+      {
+        "end": "A",
+        "type": "turn",
+        "dia": 16.662,
+        "length": 12,
+        "pitch": 0,
+        "qty": 1,
+        "note": "G3/8 BSP thread OD"
+      },
+      {
+        "end": "A",
+        "type": "thread_ext",
+        "dia": 16.662,
+        "length": 9.5,
+        "pitch": 1.337,
+        "qty": 1,
+        "note": "G3/8 BSP"
+      },
+      {
+        "end": "A",
+        "type": "groove",
+        "dia": 14.7,
+        "length": 2.5,
+        "pitch": 0,
+        "qty": 1,
+        "note": "B-type undercut R1.2"
+      },
+      {
+        "end": "A",
+        "type": "chamfer",
+        "dia": 16.662,
+        "length": 0,
+        "pitch": 0,
+        "qty": 1,
+        "note": "1.5x30 deg"
+      },
+      {
+        "end": "A",
+        "type": "hex_chamfer",
+        "dia": 22,
+        "length": 0,
+        "pitch": 0,
+        "qty": 1,
+        "note": ""
+      },
+      {
+        "end": "B",
+        "type": "turn",
+        "dia": 18,
+        "length": 11,
+        "pitch": 0,
+        "qty": 1,
+        "note": "M18x1.5 thread OD"
+      },
+      {
+        "end": "B",
+        "type": "thread_ext",
+        "dia": 18,
+        "length": 8,
+        "pitch": 1.5,
+        "qty": 1,
+        "note": "M18x1.5"
+      },
+      {
+        "end": "B",
+        "type": "groove",
+        "dia": 15.7,
+        "length": 3,
+        "pitch": 0,
+        "qty": 1,
+        "note": "thread undercut"
+      },
+      {
+        "end": "B",
+        "type": "cone_24",
+        "dia": 14.3,
+        "length": 0,
+        "pitch": 0,
+        "qty": 1,
+        "note": "24 deg cone ISO 8434-1"
+      },
+      {
+        "end": "B",
+        "type": "bore",
+        "dia": 12.2,
+        "length": 7,
+        "pitch": 0,
+        "qty": 1,
+        "note": "tube bore 12.15/12.26"
+      },
+      {
+        "end": "B",
+        "type": "chamfer",
+        "dia": 18,
+        "length": 0,
+        "pitch": 0,
+        "qty": 1,
+        "note": "1.5x30 deg"
+      },
+      {
+        "end": "B",
+        "type": "hex_chamfer",
+        "dia": 22,
+        "length": 0,
+        "pitch": 0,
+        "qty": 1,
+        "note": ""
+      }
+    ],
+    "warnings": []
+  },
+  "actual_cycle_time_min": 4.5,
+  "source": "Straight sheet row 7, cost sheet saish (1).xlsx; features transcribed manually from drawing GE 12X3-8 L-B .pdf",
+  "use_for_calibration": true
+}
